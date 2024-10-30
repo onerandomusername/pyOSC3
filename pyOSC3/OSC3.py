@@ -14,7 +14,7 @@ OpenSoundControl
 ===============================================================================
 
 OpenSoundControl is a network-protocol for sending (small) packets of addressed
-data over network sockets. This OSC-implementation supports the classical 
+data over network sockets. This OSC-implementation supports the classical
 UDP/IP protocol for sending and receiving packets but provides as well support
 for TCP/IP streaming, whereas the message size is prepended as int32 (big
 endian) before each message/packet.
@@ -31,13 +31,13 @@ OSC-packets come in two kinds:
     - OSC-bundles are a special type of OSC-message containing only
     OSC-messages as 'payload'. Recursively. (meaning; an OSC-bundle could
     contain other OSC-bundles, containing OSC-bundles etc.)
-    
+
 OSC-bundles start with the special keyword '#bundle' and do not have an
 OSC-address (but the OSC-messages a bundle contains will have OSC-addresses!).
 Also, an OSC-bundle can have a timetag, essentially telling the receiving
 server to 'hold' the bundle until the specified time. The OSCBundle class
 allows easy cration & manipulation of OSC-bundles.
-    
+
 For further information see also http://opensoundcontrol.org/spec-1_0
 
 -------------------------------------------------------------------------------
@@ -89,14 +89,14 @@ v0.3.0    - 27 Dec. 2007
     Started out to extend the 'SimpleOSC' implementation (v0.2.3) by Daniel Holth & Clinton McChesney.
     Rewrote OSCMessage
     Added OSCBundle
-    
+
 v0.3.1    - 3 Jan. 2008
     Added OSClient
-    Added OSCRequestHandler, loosely based on the original CallbackManager 
+    Added OSCRequestHandler, loosely based on the original CallbackManager
     Added OSCServer
     Removed original CallbackManager
     Adapted testing-script (the 'if __name__ == "__main__":' block at the end) to use new Server & Client
-    
+
 v0.3.2    - 5 Jan. 2008
     Added 'container-type emulation' methods (getitem(), setitem(), __iter__() & friends) to OSCMessage
     Added ThreadingOSCServer & ForkingOSCServer
@@ -107,7 +107,7 @@ v0.3.2    - 5 Jan. 2008
 v0.3.3    - 9 Jan. 2008
     Added OSC-timetag support to OSCBundle & OSCRequestHandler
     Added ThreadingOSCRequestHandler
-    
+
 v0.3.4    - 13 Jan. 2008
     Added message-filtering to OSCMultiClient
     Added subscription-handler to OSCServer
@@ -131,12 +131,12 @@ Original Comments
 -----------------
 > Open SoundControl for Python
 > Copyright (C) 2002 Daniel Holth, Clinton McChesney
-> 
+>
 > This library is free software; you can redistribute it and/or modify it under
 > the terms of the GNU Lesser General Public License as published by the Free
 > Software Foundation; either version 2.1 of the License, or (at your option) any
 > later version.
-> 
+>
 > This library is distributed in the hope that it will be useful, but WITHOUT ANY
 > WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 > PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
@@ -157,18 +157,28 @@ Original Comments
 >     Added a generic callback handler.
 >     - dwh
 """
-from __future__ import print_function
 
-import math, re, socket, select, string, struct, sys, threading, time, types, array, errno, inspect
+import array
+import errno
+import math
+import re
+import select
+import socket
+import string
+import struct
+import sys
+import threading
+import time
+import types
 
 if sys.version_info[0] > 2:
     long = int
     from socketserver import (
-        UDPServer,
         DatagramRequestHandler,
-        ThreadingMixIn,
         StreamRequestHandler,
         TCPServer,
+        ThreadingMixIn,
+        UDPServer,
     )
 
     try:
@@ -176,16 +186,15 @@ if sys.version_info[0] > 2:
     except ImportError:
         ForkingMixIn = ThreadingMixIn
 else:
-    from SocketServer import (
-        UDPServer,
+    from socketserver import (
         DatagramRequestHandler,
         ForkingMixIn,
-        ThreadingMixIn,
         StreamRequestHandler,
         TCPServer,
+        ThreadingMixIn,
+        UDPServer,
     )
 
-from contextlib import closing
 
 global version
 version = ("0.3", "6", "$Rev: 6382 $"[6:-2])
@@ -2837,7 +2846,7 @@ class OSCStreamingClient(OSCAddressSpace):
         self._running = False
 
     def _receiveWithTimeout(self, count):
-        chunk = str()
+        chunk = bytes()
         while len(chunk) < count:
             try:
                 tmp = self.socket.recv(count - len(chunk))
